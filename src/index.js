@@ -3,4 +3,3 @@ const getDiffs = () => {
 };
 
 export default getDiffs;
-
