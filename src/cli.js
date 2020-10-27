@@ -1,14 +1,17 @@
 import pkg from 'commander';
+import genDiff from '../src/index.js';
+// import genDiff from './index.js'; // почему не работает?
 
 const { program } = pkg;
 
-const gendiff = () => {
+const genDiffCli = () => {
   program
     .version('0.0.1')
     .description('Compares two configuration files and shows a difference.')
-    .option('-f, --format [type]', 'output format');
+    .option('-f, --format [type]', 'output format')
+    .action(genDiff);
 
   program.parse(process.argv);
 };
 
-export default gendiff;
+export default genDiffCli;

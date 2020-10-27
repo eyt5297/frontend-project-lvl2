@@ -1,5 +1,5 @@
-const getDiffs = () => {
+const genDiff = () => {
   console.log('do...');
 };
 
-export default getDiffs;
+export default genDiff;
