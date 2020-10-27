@@ -5,7 +5,6 @@ const readJSON = (file) => {
   return JSON.parse(contentFile);
 };
 
-
 const genDiff = (file1, file2) => {
   const json1 = readJSON(file1);
   const json2 = readJSON(file2);
