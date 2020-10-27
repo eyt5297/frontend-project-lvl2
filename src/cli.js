@@ -1,6 +1,5 @@
 import pkg from 'commander';
-import genDiff from '../src/index.js';
-// import genDiff from './index.js'; // почему не работает?
+import genDiff from './index.js';
 
 const { program } = pkg;
 
