@@ -6,7 +6,7 @@ lint:
 	npx eslint .
 
 t: ## show tree of project without node modules
-	tree -I node_modules
+	tree --dirsfirst -I node_modules
 
 
 
