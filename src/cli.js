@@ -16,7 +16,7 @@ const genDiffCli = () => {
     .arguments('<file1> <file2>')
     .action(showDiff);
 
-  program.parse(process.argv);
+   program.parse(process.argv);
 };
 
 export default genDiffCli;
