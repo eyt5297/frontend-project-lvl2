@@ -57,7 +57,6 @@ const genDiff = (file1, file2) => {
   + ${diffKey.key}: ${diffKey.newValue}`;
   }).join('\n');
 
-  // console.log(diffText);
   return `{
 ${diffText}
 }`;
