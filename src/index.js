@@ -1,13 +1,18 @@
 import fs from 'fs';
 import _ from 'lodash';
-// import yaml from 'js-yaml';
-
-const readJSON = (file) => {
-  const contentFile = fs.readFileSync(file, 'utf8');
-  return JSON.parse(contentFile);
-};
+import { extname } from 'path';
+import yaml from 'js-yaml';
 
 // const readYaml = (file) => yaml.load(fs.readFileSync(file, 'utf8'));
+const readFile = {
+  json: (file) => {
+    const contentFile = fs.readFileSync(file, 'utf8');
+    return JSON.parse(contentFile);
+  },
+
+  yaml: (file) => yaml.load(fs.readFileSync(file, 'utf8')),
+};
+
 const getStatusKeys = (obj1, obj2) => {
   const keys1 = Object.keys(obj1);
   const keys2 = Object.keys(obj2);
@@ -69,8 +74,15 @@ ${diffText}
 };
 
 const genDiff = (file1, file2) => {
-  const obj1 = readJSON(file1);
-  const obj2 = readJSON(file2);
+  const exts = {
+    '.json': 'json',
+    '.yaml': 'yaml',
+    '.yml': 'yaml',
+  };
+  const ext1 = exts[extname(file1)];
+  const obj1 = readFile[ext1](file1);
+  const ext2 = exts[extname(file2)];
+  const obj2 = readFile[ext2](file2);
 
   const diffKeys = getStatusKeys(obj1, obj2);
   const diffText = getResultDiff(diffKeys);
