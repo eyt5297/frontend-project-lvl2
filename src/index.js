@@ -1,37 +1,37 @@
 import fs from 'fs';
 import _ from 'lodash';
+// import yaml from 'js-yaml';
 
 const readJSON = (file) => {
   const contentFile = fs.readFileSync(file, 'utf8');
   return JSON.parse(contentFile);
 };
 
-const genDiff = (file1, file2) => {
-  const json1 = readJSON(file1);
-  const json2 = readJSON(file2);
+// const readYaml = (file) => yaml.load(fs.readFileSync(file, 'utf8'));
+const getStatusKeys = (obj1, obj2) => {
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+  const allKeys = _.union(keys1, keys2).sort();
 
-  const keys1 = Object.keys(json1);
-  const keys2 = Object.keys(json2);
-  const keysAll = _.union(keys1, keys2).sort();
-
-  const diffKeys = keysAll.map((key) => {
+  const statusKeys = allKeys.map((key) => {
     const diffKey = { key };
-    const hasInJson1 = _.has(json1, key);
-    const hasInJson2 = _.has(json2, key);
-    if (!hasInJson1) {
+    const isIncludeKeys1 = _.includes(keys1, key);
+    const isIncludeKeys2 = _.includes(keys2, key);
+
+    if (!isIncludeKeys1) {
       diffKey.status = 'add';
-      diffKey.newValue = json2[key];
+      diffKey.newValue = obj2[key];
       return diffKey;
     }
 
-    if (!hasInJson2) {
+    if (!isIncludeKeys2) {
       diffKey.status = 'remove';
-      diffKey.value = json1[key];
+      diffKey.value = obj1[key];
       return diffKey;
     }
 
-    diffKey.value = json1[key];
-    diffKey.newValue = json2[key];
+    diffKey.value = obj1[key];
+    diffKey.newValue = obj2[key];
 
     if (diffKey.value === diffKey.newValue) {
       diffKey.status = 'leav';
@@ -42,24 +42,40 @@ const genDiff = (file1, file2) => {
     return diffKey;
   });
 
-  const diffText = diffKeys.map((diffKey) => {
-    switch (diffKey.status) {
-      case 'add':
-        return `  + ${diffKey.key}: ${diffKey.newValue}`;
-      case 'remove':
-        return `  - ${diffKey.key}: ${diffKey.value}`;
-      case 'leav':
-        return `    ${diffKey.key}: ${diffKey.value}`;
-      default:
-        break;
-    }
-    return `  - ${diffKey.key}: ${diffKey.value}
+  return statusKeys;
+};
+
+const getResultDiff = (diffKeys) => {
+  const diffText = diffKeys
+    .map((diffKey) => {
+      switch (diffKey.status) {
+        case 'add':
+          return `  + ${diffKey.key}: ${diffKey.newValue}`;
+        case 'remove':
+          return `  - ${diffKey.key}: ${diffKey.value}`;
+        case 'leav':
+          return `    ${diffKey.key}: ${diffKey.value}`;
+        default:
+          break;
+      }
+      return `  - ${diffKey.key}: ${diffKey.value}
   + ${diffKey.key}: ${diffKey.newValue}`;
-  }).join('\n');
+    })
+    .join('\n');
 
   return `{
 ${diffText}
 }`;
+};
+
+const genDiff = (file1, file2) => {
+  const obj1 = readJSON(file1);
+  const obj2 = readJSON(file2);
+
+  const diffKeys = getStatusKeys(obj1, obj2);
+  const diffText = getResultDiff(diffKeys);
+
+  return diffText;
 };
 
 export default genDiff;
