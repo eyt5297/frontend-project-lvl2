@@ -2,24 +2,23 @@ import fs from 'fs';
 import { extname } from 'path';
 import yaml from 'js-yaml';
 
-const readFile = {
-  json: (file) => {
-    const contentFile = fs.readFileSync(file, 'utf8');
-    return JSON.parse(contentFile);
-  },
-  yaml: (file) => yaml.load(fs.readFileSync(file, 'utf8')),
+const parseContent = {
+  json: (content) => JSON.parse(content),
+  yaml: (content) => yaml.load(content),
 };
 
-const parsers = (file) => {
+const parseFile = (file) => {
   const exts = {
     '.json': 'json',
     '.yaml': 'yaml',
     '.yml': 'yaml',
   };
+
   const ext = exts[extname(file)];
-  const obj = readFile[ext](file);
+  const content = fs.readFileSync(file, 'utf8');
+  const obj = parseContent[ext](content);
 
   return obj;
 };
 
-export default parsers;
+export default parseFile;
