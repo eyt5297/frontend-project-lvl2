@@ -6,13 +6,6 @@ const getStatusKeys = (obj1, obj2) => {
   const keys2 = Object.keys(obj2);
   const allKeys = _.union(keys1, keys2).sort();
 
-  const getValue = (objValue) => {
-    if (_.isPlainObject(objValue)) {
-      return getStatusKeys(objValue, objValue);
-    }
-    return objValue;
-  };
-
   const statusKeys = allKeys.map((key) => {
     const diffKey = { key };
     const isIncludeKeys1 = _.includes(keys1, key);
@@ -20,13 +13,13 @@ const getStatusKeys = (obj1, obj2) => {
 
     if (!isIncludeKeys1) {
       diffKey.status = 'add';
-      diffKey.newValue = getValue(obj2[key]);
+      diffKey.newValue = obj2[key];
       return diffKey;
     }
 
     if (!isIncludeKeys2) {
       diffKey.status = 'remove';
-      diffKey.value = getValue(obj1[key]);
+      diffKey.value = obj1[key];
       return diffKey;
     }
 
@@ -36,8 +29,8 @@ const getStatusKeys = (obj1, obj2) => {
       return diffKey;
     }
 
-    diffKey.value = getValue(obj1[key]);
-    diffKey.newValue = getValue(obj2[key]);
+    diffKey.value = obj1[key];
+    diffKey.newValue = obj2[key];
 
     if (diffKey.value === diffKey.newValue) {
       diffKey.status = 'leav';
@@ -51,10 +44,30 @@ const getStatusKeys = (obj1, obj2) => {
   return statusKeys;
 };
 
+const getFormatedObject = (obj, shiftCount = 1) => {
+  const keys = Object.keys(obj).sort();
+
+  const result = keys
+    .map((key) => {
+      const value = _.isPlainObject(obj[key])
+        ? getFormatedObject(obj[key], shiftCount + 2)
+        : obj[key];
+      return `${'  '.repeat(shiftCount)}  ${key}: ${value}`;
+    })
+    .join('\n');
+
+  return `{
+${result}
+${'  '.repeat(shiftCount - 1)}}`;
+};
+
 const getResultDiff = (diffKeys, shiftCount = 1) => {
   const convertValue = (value) => {
     if (_.isArray(value)) {
       return getResultDiff(value, shiftCount + 2);
+    }
+    if (_.isPlainObject(value)) {
+      return getFormatedObject(value, shiftCount + 2);
     }
     return value;
   };
