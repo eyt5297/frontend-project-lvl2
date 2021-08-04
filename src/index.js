@@ -33,7 +33,7 @@ const getAstDiff = (obj1, obj2) => {
     diffKey.newValue = obj2[key];
 
     if (diffKey.oldValue === diffKey.newValue) {
-      diffKey.type = 'leftValue';
+      diffKey.type = 'unchangedValue';
       diffKey.value = diffKey.oldValue;
       return diffKey;
     }
@@ -62,7 +62,7 @@ ${result}
 ${'  '.repeat(shiftCount - 1)}}`;
 };
 
-const getResultDiff = (diffKeys, shiftCount = 1) => {
+const formatStylish = (diffKeys, shiftCount = 1) => {
   const convertValue = (value) => {
     if (_.isPlainObject(value)) {
       return getFormatedObject(value, shiftCount + 2);
@@ -74,12 +74,12 @@ const getResultDiff = (diffKeys, shiftCount = 1) => {
     .flatMap((diffKey) => {
       switch (diffKey.type) {
         case 'node':
-          return `${'  '.repeat(shiftCount)}  ${diffKey.key}: ${getResultDiff(diffKey.children, shiftCount + 2)}`;
+          return `${'  '.repeat(shiftCount)}  ${diffKey.key}: ${formatStylish(diffKey.children, shiftCount + 2)}`;
         case 'addedValue':
           return `${'  '.repeat(shiftCount)}+ ${diffKey.key}: ${convertValue(diffKey.newValue)}`;
         case 'removedValue':
           return `${'  '.repeat(shiftCount)}- ${diffKey.key}: ${convertValue(diffKey.oldValue)}`;
-        case 'leftValue':
+        case 'unchangedValue':
           return `${'  '.repeat(shiftCount)}  ${diffKey.key}: ${convertValue(diffKey.value)}`;
         case 'changedValue':
           return `${'  '.repeat(shiftCount)}- ${diffKey.key}: ${convertValue(diffKey.oldValue)}
@@ -101,8 +101,8 @@ const genDiff = (file1, file2) => {
   const obj2 = parsers(file2);
 
   const diffKeys = getAstDiff(obj1, obj2);
-  console.log(JSON.stringify(diffKeys, undefined, 4));
-  const diffText = getResultDiff(diffKeys);
+  // console.log(JSON.stringify(diffKeys, undefined, 4));
+  const diffText = formatStylish(diffKeys);
 
   return diffText;
 };
