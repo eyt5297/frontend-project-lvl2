@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import parsers from './parsers.js';
+import format from './formatters/index.js';
 
 const getAstDiff = (obj1, obj2) => {
   const keys1 = Object.keys(obj1);
@@ -45,64 +46,13 @@ const getAstDiff = (obj1, obj2) => {
   return astDiff;
 };
 
-const getFormatedObject = (obj, shiftCount = 0) => {
-  const keys = Object.keys(obj).sort();
-
-  const result = keys
-    .map((key) => {
-      const value = _.isPlainObject(obj[key])
-        ? getFormatedObject(obj[key], shiftCount + 2)
-        : obj[key];
-      return `${'  '.repeat(shiftCount)}  ${key}: ${value}`;
-    })
-    .join('\n');
-
-  return `{
-${result}
-${'  '.repeat(shiftCount - 1)}}`;
-};
-
-const formatStylish = (diffKeys, shiftCount = 1) => {
-  const convertValue = (value) => {
-    if (_.isPlainObject(value)) {
-      return getFormatedObject(value, shiftCount + 2);
-    }
-    return value;
-  };
-
-  const diffText = diffKeys
-    .flatMap((diffKey) => {
-      switch (diffKey.type) {
-        case 'node':
-          return `${'  '.repeat(shiftCount)}  ${diffKey.key}: ${formatStylish(diffKey.children, shiftCount + 2)}`;
-        case 'addedValue':
-          return `${'  '.repeat(shiftCount)}+ ${diffKey.key}: ${convertValue(diffKey.newValue)}`;
-        case 'removedValue':
-          return `${'  '.repeat(shiftCount)}- ${diffKey.key}: ${convertValue(diffKey.oldValue)}`;
-        case 'unchangedValue':
-          return `${'  '.repeat(shiftCount)}  ${diffKey.key}: ${convertValue(diffKey.value)}`;
-        case 'changedValue':
-          return `${'  '.repeat(shiftCount)}- ${diffKey.key}: ${convertValue(diffKey.oldValue)}
-${'  '.repeat(shiftCount)}+ ${diffKey.key}: ${convertValue(diffKey.newValue)}`;
-        default:
-          break;
-      }
-      return null;
-    })
-    .join('\n');
-
-  return `{
-${diffText}
-${'  '.repeat(shiftCount - 1)}}`;
-};
-
-const genDiff = (file1, file2) => {
+const genDiff = (file1, file2, styleFormat = 'stylish') => {
   const obj1 = parsers(file1);
   const obj2 = parsers(file2);
 
   const diffKeys = getAstDiff(obj1, obj2);
   // console.log(JSON.stringify(diffKeys, undefined, 4));
-  const diffText = formatStylish(diffKeys);
+  const diffText = format(diffKeys, styleFormat);
 
   return diffText;
 };
