@@ -12,6 +12,7 @@ const readFile = (filename) => fs.readFileSync(getFixturePath(filename), 'utf-8'
 
 const resultStylish = readFile('resultStylish.txt').trim();
 const resultPlain = readFile('resultPlain.txt').trim();
+const resultJson = readFile('resultJson.json').trim();
 
 test('genDiffJson to stylish format', () => {
   const file1 = getFixturePath('file1.json');
@@ -35,4 +36,16 @@ test('genDiffYaml to plain format', () => {
   const file1 = getFixturePath('file1.yaml');
   const file2 = getFixturePath('file2.yaml');
   expect(genDiff(file1, file2, 'plain')).toEqual(resultPlain);
+});
+
+test('genDiffJson to json format', () => {
+  const file1 = getFixturePath('file1.json');
+  const file2 = getFixturePath('file2.json');
+  expect(genDiff(file1, file2, 'json')).toEqual(resultJson);
+});
+
+test('genDiffYaml to json format', () => {
+  const file1 = getFixturePath('file1.yaml');
+  const file2 = getFixturePath('file2.yaml');
+  expect(genDiff(file1, file2, 'json')).toEqual(resultJson);
 });
