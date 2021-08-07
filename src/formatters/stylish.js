@@ -1,5 +1,7 @@
 import _ from 'lodash';
 
+const formatNode = (key, value, shiftCount, label) => `${'  '.repeat(shiftCount)}${label}${key}: ${value}`;
+
 const getFormatedObject = (obj, shiftCount = 0) => {
   const keys = Object.keys(obj).sort();
 
@@ -8,7 +10,7 @@ const getFormatedObject = (obj, shiftCount = 0) => {
       const value = _.isPlainObject(obj[key])
         ? getFormatedObject(obj[key], shiftCount + 2)
         : obj[key];
-      return `${'  '.repeat(shiftCount)}  ${key}: ${value}`;
+      return formatNode(key, value, shiftCount, '  ');
     })
     .join('\n');
 
@@ -17,7 +19,7 @@ ${result}
 ${'  '.repeat(shiftCount - 1)}}`;
 };
 
-const fmt = (diffKeys, shiftCount = 1) => {
+const fmt = (ast, shiftCount = 1) => {
   const convertValue = (value) => {
     if (_.isPlainObject(value)) {
       return getFormatedObject(value, shiftCount + 2);
@@ -25,20 +27,22 @@ const fmt = (diffKeys, shiftCount = 1) => {
     return value;
   };
 
-  const diffText = diffKeys
-    .flatMap((diffKey) => {
-      switch (diffKey.type) {
+  const diffText = ast
+    .flatMap((node) => {
+      switch (node.type) {
         case 'node':
-          return `${'  '.repeat(shiftCount)}  ${diffKey.key}: ${fmt(diffKey.children, shiftCount + 2)}`;
+          return formatNode(node.key, fmt(node.children, shiftCount + 2), shiftCount, '  ');
         case 'addedValue':
-          return `${'  '.repeat(shiftCount)}+ ${diffKey.key}: ${convertValue(diffKey.newValue)}`;
+          return formatNode(node.key, convertValue(node.newValue), shiftCount, '+ ');
         case 'removedValue':
-          return `${'  '.repeat(shiftCount)}- ${diffKey.key}: ${convertValue(diffKey.oldValue)}`;
+          return formatNode(node.key, convertValue(node.oldValue), shiftCount, '- ');
         case 'unchangedValue':
-          return `${'  '.repeat(shiftCount)}  ${diffKey.key}: ${convertValue(diffKey.value)}`;
+          return formatNode(node.key, convertValue(node.value), shiftCount, '  ');
         case 'changedValue':
-          return `${'  '.repeat(shiftCount)}- ${diffKey.key}: ${convertValue(diffKey.oldValue)}
-${'  '.repeat(shiftCount)}+ ${diffKey.key}: ${convertValue(diffKey.newValue)}`;
+          return [
+            formatNode(node.key, convertValue(node.oldValue), shiftCount, '- '),
+            formatNode(node.key, convertValue(node.newValue), shiftCount, '+ '),
+          ];
         default:
           break;
       }
@@ -51,4 +55,4 @@ ${diffText}
 ${'  '.repeat(shiftCount - 1)}}`;
 };
 
-export default fmt;
+export default (ast) => fmt(ast, 1);

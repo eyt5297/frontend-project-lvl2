@@ -50,9 +50,9 @@ const genDiff = (file1, file2, styleFormat = 'stylish') => {
   const obj1 = parsers(file1);
   const obj2 = parsers(file2);
 
-  const diffKeys = getAstDiff(obj1, obj2);
+  const ast = getAstDiff(obj1, obj2);
   // console.log(JSON.stringify(diffKeys, undefined, 4));
-  const diffText = format(diffKeys, styleFormat);
+  const diffText = format(ast, styleFormat);
 
   return diffText;
 };
