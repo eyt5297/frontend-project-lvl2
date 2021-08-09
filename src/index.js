@@ -5,7 +5,7 @@ import format from './formatters/index.js';
 const getAstDiff = (obj1, obj2) => {
   const keys1 = Object.keys(obj1);
   const keys2 = Object.keys(obj2);
-  const allKeys = _.union(keys1, keys2).sort();
+  const allKeys = _.sortBy(_.union(keys1, keys2));
 
   const astDiff = allKeys.map((key) => {
     const diffKey = { key };
@@ -13,34 +13,26 @@ const getAstDiff = (obj1, obj2) => {
     const isIncludeKeys2 = _.includes(keys2, key);
 
     if (!isIncludeKeys1) {
-      diffKey.type = 'addedValue';
-      diffKey.newValue = obj2[key];
-      return diffKey;
+      return { key, type: 'addedValue', newValue: obj2[key] };
     }
 
     if (!isIncludeKeys2) {
-      diffKey.type = 'removedValue';
-      diffKey.oldValue = obj1[key];
-      return diffKey;
+      return { key, type: 'removedValue', oldValue: obj1[key] };
     }
 
     if (_.isPlainObject(obj1[key]) && _.isPlainObject(obj2[key])) {
-      diffKey.type = 'node';
-      diffKey.children = getAstDiff(obj1[key], obj2[key]);
-      return diffKey;
+      return { key, type: 'node', children: getAstDiff(obj1[key], obj2[key]) };
     }
 
-    diffKey.oldValue = obj1[key];
-    diffKey.newValue = obj2[key];
-
-    if (diffKey.oldValue === diffKey.newValue) {
-      diffKey.type = 'unchangedValue';
-      diffKey.value = diffKey.oldValue;
-      return diffKey;
+    if (obj1[key] === obj2[key]) {
+      return {
+        key, type: 'unchangedValue', value: obj1[key],
+      };
     }
 
-    diffKey.type = 'changedValue';
-    return diffKey;
+    return {
+      key, type: 'changedValue', newValue: obj2[key], oldValue: obj1[key],
+    };
   });
 
   return astDiff;

@@ -3,7 +3,7 @@ import _ from 'lodash';
 const formatNode = (key, value, shiftCount, label) => `${'  '.repeat(shiftCount)}${label}${key}: ${value}`;
 
 const getFormatedObject = (obj, shiftCount = 0) => {
-  const keys = Object.keys(obj).sort();
+  const keys = _.sortBy(Object.keys(obj));
 
   const result = keys
     .map((key) => {
