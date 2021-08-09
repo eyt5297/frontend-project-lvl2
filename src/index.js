@@ -8,7 +8,6 @@ const getAstDiff = (obj1, obj2) => {
   const allKeys = _.sortBy(_.union(keys1, keys2));
 
   const astDiff = allKeys.map((key) => {
-    const diffKey = { key };
     const isIncludeKeys1 = _.includes(keys1, key);
     const isIncludeKeys2 = _.includes(keys2, key);
 
