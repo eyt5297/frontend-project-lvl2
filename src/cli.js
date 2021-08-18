@@ -1,7 +1,5 @@
-import pkg from 'commander';
+import { program } from 'commander';
 import genDiff from './index.js';
-
-const { program } = pkg;
 
 const genDiffCli = () => {
   program

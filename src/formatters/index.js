@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import stylish from './stylish.js';
 import plain from './plain.js';
 import json from './json.js';
@@ -9,6 +10,9 @@ const formatters = {
 };
 
 export default (ast, format) => {
-  console.log();
+  if (!_.has(formatters, format)) {
+    throw new Error('Unknown output format!');
+  }
+
   return formatters[format](ast);
 };

@@ -3,13 +3,11 @@ import _ from 'lodash';
 const formatNode = (key, value, shiftCount, label) => `${'  '.repeat(shiftCount)}${label}${key}: ${value}`;
 
 const getFormatedObject = (obj, shiftCount = 0) => {
-  const keys = _.sortBy(Object.keys(obj));
-
-  const result = keys
-    .map((key) => {
-      const value = _.isPlainObject(obj[key])
-        ? getFormatedObject(obj[key], shiftCount + 2)
-        : obj[key];
+  const result = Object.entries(obj)
+    .map(([key, objValue]) => {
+      const value = _.isPlainObject(objValue)
+        ? getFormatedObject(objValue, shiftCount + 2)
+        : objValue;
       return formatNode(key, value, shiftCount, '  ');
     })
     .join('\n');
@@ -28,25 +26,26 @@ const fmt = (ast, shiftCount = 1) => {
   };
 
   const diffText = ast
-    .flatMap((node) => {
-      switch (node.type) {
-        case 'node':
-          return formatNode(node.key, fmt(node.children, shiftCount + 2), shiftCount, '  ');
+    .flatMap(({
+      type, key, value, newValue, oldValue, children,
+    }) => {
+      switch (type) {
+        case 'nestedValue':
+          return formatNode(key, fmt(children, shiftCount + 2), shiftCount, '  ');
         case 'addedValue':
-          return formatNode(node.key, convertValue(node.newValue), shiftCount, '+ ');
+          return formatNode(key, convertValue(newValue), shiftCount, '+ ');
         case 'removedValue':
-          return formatNode(node.key, convertValue(node.oldValue), shiftCount, '- ');
+          return formatNode(key, convertValue(oldValue), shiftCount, '- ');
         case 'unchangedValue':
-          return formatNode(node.key, convertValue(node.value), shiftCount, '  ');
+          return formatNode(key, convertValue(value), shiftCount, '  ');
         case 'changedValue':
           return [
-            formatNode(node.key, convertValue(node.oldValue), shiftCount, '- '),
-            formatNode(node.key, convertValue(node.newValue), shiftCount, '+ '),
+            formatNode(key, convertValue(oldValue), shiftCount, '- '),
+            formatNode(key, convertValue(newValue), shiftCount, '+ '),
           ];
         default:
-          break;
+          throw new Error(`Unknown type: '${type}'!`);
       }
-      return null;
     })
     .join('\n');
 

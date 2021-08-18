@@ -9,7 +9,7 @@ const formatValue = (value) => {
     return `'${value}'`;
   }
 
-  return `${value}`;
+  return value;
 };
 
 export default (ast) => {
@@ -19,20 +19,20 @@ export default (ast) => {
       .flatMap(({
         type, key, newValue, oldValue, children,
       }) => {
-        const path = [...prePath, key].join('.');
+        const path = [...prePath, key];
+        const pathName = path.join('.');
         switch (type) {
           case 'addedValue':
-            return `Property '${path}' was added with value: ${formatValue(newValue)}`;
+            return `Property '${pathName}' was added with value: ${formatValue(newValue)}`;
           case 'removedValue':
-            return `Property '${path}' was removed`;
+            return `Property '${pathName}' was removed`;
           case 'changedValue':
-            return `Property '${path}' was updated. From ${formatValue(oldValue)} to ${formatValue(newValue)}`;
-          case 'node':
-            return iter(children, [path]);
+            return `Property '${pathName}' was updated. From ${formatValue(oldValue)} to ${formatValue(newValue)}`;
+          case 'nestedValue':
+            return iter(children, path);
           default:
-            break;
+            throw new Error(`Unknown type: '${type}'!`);
         }
-        return null;
       });
 
     return res;

@@ -1,24 +1,16 @@
-import fs from 'fs';
-import { extname } from 'path';
 import yaml from 'js-yaml';
+import _ from 'lodash';
 
 const parseContent = {
   json: (content) => JSON.parse(content),
   yaml: (content) => yaml.load(content),
+  yml: (content) => yaml.load(content),
 };
 
-const parseFile = (file) => {
-  const exts = {
-    '.json': 'json',
-    '.yaml': 'yaml',
-    '.yml': 'yaml',
-  };
+export default (content, fileFormat) => {
+  if (!_.has(parseContent, fileFormat)) {
+    throw new Error('Unknown format file!');
+  }
 
-  const ext = exts[extname(file)];
-  const content = fs.readFileSync(file, 'utf8');
-  const obj = parseContent[ext](content);
-
-  return obj;
+  return parseContent[fileFormat](content);
 };
-
-export default parseFile;

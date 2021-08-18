@@ -14,38 +14,29 @@ const resultStylish = readFile('resultStylish.txt').trim();
 const resultPlain = readFile('resultPlain.txt').trim();
 const resultJson = readFile('resultJson.json').trim();
 
-test('genDiffJson to stylish format', () => {
-  const file1 = getFixturePath('file1.json');
-  const file2 = getFixturePath('file2.json');
-  expect(genDiff(file1, file2, 'stylish')).toEqual(resultStylish);
-});
-
-test('genDiffYaml to stylish format', () => {
-  const file1 = getFixturePath('file1.yaml');
-  const file2 = getFixturePath('file2.yaml');
-  expect(genDiff(file1, file2, 'stylish')).toEqual(resultStylish);
-});
-
-test('genDiffJson to plain format', () => {
-  const file1 = getFixturePath('file1.json');
-  const file2 = getFixturePath('file2.json');
-  expect(genDiff(file1, file2, 'plain')).toEqual(resultPlain);
-});
-
-test('genDiffYaml to plain format', () => {
-  const file1 = getFixturePath('file1.yaml');
-  const file2 = getFixturePath('file2.yaml');
-  expect(genDiff(file1, file2, 'plain')).toEqual(resultPlain);
-});
-
-test('genDiffJson to json format', () => {
-  const file1 = getFixturePath('file1.json');
-  const file2 = getFixturePath('file2.json');
-  expect(genDiff(file1, file2, 'json')).toEqual(resultJson);
-});
-
-test('genDiffYaml to json format', () => {
-  const file1 = getFixturePath('file1.yaml');
-  const file2 = getFixturePath('file2.yaml');
-  expect(genDiff(file1, file2, 'json')).toEqual(resultJson);
+test.each([
+  {
+    format: 'stylish', file1: 'file1.json', file2: 'file2.json', expected: resultStylish,
+  },
+  {
+    format: 'stylish', file1: 'file1.yaml', file2: 'file2.yaml', expected: resultStylish,
+  },
+  {
+    format: 'plain', file1: 'file1.json', file2: 'file2.json', expected: resultPlain,
+  },
+  {
+    format: 'plain', file1: 'file1.yaml', file2: 'file2.yaml', expected: resultPlain,
+  },
+  {
+    format: 'json', file1: 'file1.json', file2: 'file2.json', expected: resultJson,
+  },
+  {
+    format: 'json', file1: 'file1.yaml', file2: 'file2.yaml', expected: resultJson,
+  },
+])('genDiff $format $file1 $file2', ({
+  format, file1, file2, expected,
+}) => {
+  const filePath1 = getFixturePath(file1);
+  const filePath2 = getFixturePath(file2);
+  expect(genDiff(filePath1, filePath2, format)).toEqual(expected);
 });
