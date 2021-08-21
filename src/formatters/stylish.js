@@ -5,6 +5,7 @@ const objShift = 2;
 const formatNode = (key, value, shiftCount, label) => `${identSymbol.repeat(shiftCount)}${label}${key}: ${value}`;
 
 const stringify = (value, shiftCount = 0) => {
+  const closeOffset = identSymbol.repeat(shiftCount + 1);
   const currentShift = shiftCount + objShift;
 
   if (!_.isPlainObject(value)) {
@@ -17,7 +18,7 @@ const stringify = (value, shiftCount = 0) => {
 
   return `{
 ${result}
-${identSymbol.repeat(shiftCount + 1)}}`;
+${closeOffset}}`;
 };
 
 const stylish = (ast, shiftCount = 1) => {
