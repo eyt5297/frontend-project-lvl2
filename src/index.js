@@ -9,7 +9,7 @@ const getAstDiff = (obj1, obj2) => {
   const keys2 = Object.keys(obj2);
   const allKeys = _.sortBy(_.union(keys1, keys2));
 
-  const astDiff = allKeys.map((key) => {
+  return allKeys.map((key) => {
     if (!_.has(obj1, key)) {
       return { key, type: 'addedValue', newValue: obj2[key] };
     }
@@ -32,8 +32,6 @@ const getAstDiff = (obj1, obj2) => {
       key, type: 'changedValue', newValue: obj2[key], oldValue: obj1[key],
     };
   });
-
-  return astDiff;
 };
 
 const getFormat = (filePath) => extname(filePath).slice(1);

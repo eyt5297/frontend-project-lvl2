@@ -1,47 +1,44 @@
 import _ from 'lodash';
 
-const formatNode = (key, value, shiftCount, label) => `${'  '.repeat(shiftCount)}${label}${key}: ${value}`;
+const identSymbol = '  ';
+const objShift = 2;
+const formatNode = (key, value, shiftCount, label) => `${identSymbol.repeat(shiftCount)}${label}${key}: ${value}`;
 
-const getFormatedObject = (obj, shiftCount = 0) => {
-  const result = Object.entries(obj)
-    .map(([key, objValue]) => {
-      const value = _.isPlainObject(objValue)
-        ? getFormatedObject(objValue, shiftCount + 2)
-        : objValue;
-      return formatNode(key, value, shiftCount, '  ');
-    })
+const stringify = (value, shiftCount = 0) => {
+  const currentShift = shiftCount + objShift;
+
+  if (!_.isPlainObject(value)) {
+    return value;
+  }
+
+  const result = Object.entries(value)
+    .map(([key, objValue]) => formatNode(key, stringify(objValue, currentShift), currentShift, '  '))
     .join('\n');
 
   return `{
 ${result}
-${'  '.repeat(shiftCount - 1)}}`;
+${identSymbol.repeat(shiftCount + 1)}}`;
 };
 
-const fmt = (ast, shiftCount = 1) => {
-  const convertValue = (value) => {
-    if (_.isPlainObject(value)) {
-      return getFormatedObject(value, shiftCount + 2);
-    }
-    return value;
-  };
-
+const stylish = (ast, shiftCount = 1) => {
+  const closeOffset = identSymbol.repeat(shiftCount - 1);
   const diffText = ast
     .flatMap(({
       type, key, value, newValue, oldValue, children,
     }) => {
       switch (type) {
         case 'nestedValue':
-          return formatNode(key, fmt(children, shiftCount + 2), shiftCount, '  ');
+          return formatNode(key, stylish(children, shiftCount + objShift), shiftCount, '  ');
         case 'addedValue':
-          return formatNode(key, convertValue(newValue), shiftCount, '+ ');
+          return formatNode(key, stringify(newValue, shiftCount), shiftCount, '+ ');
         case 'removedValue':
-          return formatNode(key, convertValue(oldValue), shiftCount, '- ');
+          return formatNode(key, stringify(oldValue, shiftCount), shiftCount, '- ');
         case 'unchangedValue':
-          return formatNode(key, convertValue(value), shiftCount, '  ');
+          return formatNode(key, stringify(value, shiftCount), shiftCount, '  ');
         case 'changedValue':
           return [
-            formatNode(key, convertValue(oldValue), shiftCount, '- '),
-            formatNode(key, convertValue(newValue), shiftCount, '+ '),
+            formatNode(key, stringify(oldValue, shiftCount), shiftCount, '- '),
+            formatNode(key, stringify(newValue, shiftCount), shiftCount, '+ '),
           ];
         default:
           throw new Error(`Unknown type: '${type}'!`);
@@ -51,7 +48,7 @@ const fmt = (ast, shiftCount = 1) => {
 
   return `{
 ${diffText}
-${'  '.repeat(shiftCount - 1)}}`;
+${closeOffset}}`;
 };
 
-export default (ast) => fmt(ast, 1);
+export default (ast) => stylish(ast, 1);

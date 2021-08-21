@@ -9,7 +9,7 @@ const parseContent = {
 
 export default (content, fileFormat) => {
   if (!_.has(parseContent, fileFormat)) {
-    throw new Error('Unknown format file!');
+    throw new Error(`Unknown format file: ${fileFormat}`);
   }
 
   return parseContent[fileFormat](content);
